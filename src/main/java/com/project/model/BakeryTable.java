@@ -17,7 +17,7 @@ public class BakeryTable implements Serializable {
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "table_id")
   @JsonProperty("table_id")
-  private String tableID;
+  private Integer tableID;
 
   private String status;
 

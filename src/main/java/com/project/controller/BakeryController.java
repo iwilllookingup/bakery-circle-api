@@ -1,13 +1,12 @@
 package com.project.controller;
 
-import com.project.dto.CreateMenuRequest;
-import com.project.dto.CreateOrderRequest;
-import com.project.dto.CreateTransactionRequest;
-import com.project.dto.UpdateMenuRequest;
+import com.project.dto.*;
 import com.project.error.ResourceNotFoundException;
+import com.project.model.BakeryTable;
 import com.project.model.Menu;
 import com.project.model.Orders;
 import com.project.model.Transaction;
+import com.project.repository.BakeryTableRepository;
 import com.project.repository.MenuRepository;
 import com.project.repository.OrderRepository;
 import com.project.repository.TransactionRepository;
@@ -26,7 +25,7 @@ public class BakeryController {
   @Autowired TransactionRepository transactionRepository;
   @Autowired MenuRepository menuRepository;
   @Autowired OrderRepository orderRepository;
-  //  @Autowired BakeryTableRepository bakeryTableRepository;
+  @Autowired BakeryTableRepository bakeryTableRepository;
 
   @GetMapping("/menus")
   public List<Menu> getProductList() {
@@ -104,9 +103,7 @@ public class BakeryController {
   public void createTransaction(
       @Valid @RequestBody CreateTransactionRequest createTransactionRequest) {
     Transaction transaction = new Transaction();
-    transaction
-        .setTransactionID(createTransactionRequest.getTransactionID())
-        .setTableID(createTransactionRequest.getTableID());
+    transaction.setTableID(createTransactionRequest.getTableID());
 
     transactionRepository.save(transaction);
   }
@@ -118,6 +115,21 @@ public class BakeryController {
   @GetMapping("/transactions")
   public List<Transaction> getTransaction() {
     return transactionRepository.findAll();
+  }
+
+  @GetMapping("/tables")
+  public List<BakeryTable> getBakeryTable() {
+    return bakeryTableRepository.findAll();
+  }
+
+  @PutMapping("/table/{table_id}")
+  public void updateTableStatus(
+      @PathVariable(name = "table_id") Integer tableID,
+      @Valid @RequestBody UpdateTableStatusRequest updateTableStatusRequest) {
+    BakeryTable table = bakeryTableRepository.getOne(tableID);
+    table.setStatus(updateTableStatusRequest.getStatus());
+
+    bakeryTableRepository.save(table);
   }
 
   @PutMapping("/menu/{menu_id}/update")
