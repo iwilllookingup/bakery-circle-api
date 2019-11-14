@@ -2,18 +2,15 @@ package com.project.controller;
 
 import com.project.dto.*;
 import com.project.error.ResourceNotFoundException;
-import com.project.model.BakeryTable;
-import com.project.model.Menu;
-import com.project.model.Orders;
-import com.project.model.Transaction;
-import com.project.repository.BakeryTableRepository;
-import com.project.repository.MenuRepository;
-import com.project.repository.OrderRepository;
-import com.project.repository.TransactionRepository;
+import com.project.model.*;
+import com.project.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +23,7 @@ public class BakeryController {
   @Autowired MenuRepository menuRepository;
   @Autowired OrderRepository orderRepository;
   @Autowired BakeryTableRepository bakeryTableRepository;
+  @Autowired AdminRepository adminRepository;
 
   @GetMapping("/menus")
   public List<Menu> getProductList() {
@@ -101,16 +99,27 @@ public class BakeryController {
 
   @PostMapping("/transaction")
   public void createTransaction(
-      @Valid @RequestBody CreateTransactionRequest createTransactionRequest) {
+      @Valid @RequestBody CreateTransactionRequest createTransactionRequest) throws ParseException {
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String dateString = format.format(new Date());
+    Date date = format.parse(dateString);
+
     Transaction transaction = new Transaction();
     transaction.setTableID(createTransactionRequest.getTableID());
+    transaction.setTransactionDate(date);
 
     transactionRepository.save(transaction);
   }
 
-  // TODO
-  //  @PostMapping
-  public void login() {}
+  @PostMapping("/login")
+  public Admin login(@RequestBody LoginRequest loginRequest) {
+    try {
+      return adminRepository.findAdminByUsernameAndPassword(
+          loginRequest.getUsername(), loginRequest.getPassword());
+    } catch (Exception e) {
+      throw new ResourceNotFoundException();
+    }
+  }
 
   @GetMapping("/transactions")
   public List<Transaction> getTransaction() {
